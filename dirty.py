@@ -58,6 +58,12 @@ def dict_to_line(data):
     return ",".join(map(str, data.values()))
 
 
+def print_found_data(line):
+    for val in line:
+        if val and line[val]:
+            print(f"{val}: {line[val]}")
+
+
 if __name__ == '__main__':
     xdr = input("Enter a cortex XDR ID: ").strip()
     lines, found = pull_data(FILE, xdr)
@@ -68,20 +74,22 @@ if __name__ == '__main__':
 
     timestamp = make_timestamp()
 
-    tempCsv = line_to_dict(lines[found])
+    parsedLine = line_to_dict(lines[found])
 
-    if(not check_data(tempCsv)):
+    if(not check_data(parsedLine)):
         print("device is already unisolated, check again")
+        print_found_data(parsedLine)
         exit(1)
 
     comment = input("Enter a comment: ").strip()
 
     # update line
-    tempCsv["cortexxdr_unisolated_date"] = timestamp
-    tempCsv["cortexxdr_unisolated_comment"] = comment
-    tempCsv["cortexxdr_unisolated_by"] = NETID
+    parsedLine["cortexxdr_unisolated_date"] = timestamp
+    parsedLine["cortexxdr_unisolated_comment"] = comment
+    parsedLine["cortexxdr_unisolated_by"] = NETID
 
-    newline = dict_to_line(tempCsv)
+    # convert back to csv and replace
+    newline = dict_to_line(parsedLine)
     lines[found] = newline
 
     print(newline)
