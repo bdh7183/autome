@@ -9,6 +9,7 @@ FILE = "gois_asset_inventory_blocked_unsupported_operating_systems.csv"
 NETID = "bdh7183"
 
 
+# Make sure host isn't already unisolated
 def check_data(data):
     if (data.get("cortexxdr_unisolated_date")):
         return False
@@ -19,6 +20,7 @@ def check_data(data):
     return True
 
 
+# Create a timestamp of current time in Eastern timezone
 def make_timestamp():
     est_offset = timezone(timedelta(hours=-5))
     now_est = datetime.now(timezone.utc).astimezone(est_offset)
@@ -26,7 +28,7 @@ def make_timestamp():
     return formatted_date
 
 
-def find_data(filename, eid):
+def pull_data(filename, eid):
     found = False
     data = []
     index = 0
@@ -45,44 +47,43 @@ def update_file(filename, data):
             fd.write(i)
 
 
+# convert a line of CSV into a dictionary
 def line_to_dict(s):
     heads = HEADER.split(",")
     return dict(zip(heads, s.split(",")))
 
 
+# convert a dictionary to a line of CSV
 def dict_to_line(data):
     return ",".join(map(str, data.values()))
 
 
-heads = HEADER.split(",")
+if __name__ == '__main__':
+    xdr = input("Enter a cortex XDR ID: ").strip()
+    lines, found = pull_data(FILE, xdr)
 
+    if not found:
+        print("NOT FOUND")
+        exit(1)
 
-xdr = input("Enter a cortex XDR ID: ").strip()
-lines, found = find_data(FILE, xdr)
+    timestamp = make_timestamp()
 
-if not found:
-    print("NOT FOUND")
-    exit(1)
+    tempCsv = line_to_dict(lines[found])
 
-timestamp = make_timestamp()
+    if(not check_data(tempCsv)):
+        print("device is already unisolated, check again")
+        exit(1)
 
-r = line_to_dict(lines[found])
+    comment = input("Enter a comment: ").strip()
 
-if(not check_data(r)):
-    print("device is already unisolated, check again")
-    exit(1)
+    # update line
+    tempCsv["cortexxdr_unisolated_date"] = timestamp
+    tempCsv["cortexxdr_unisolated_comment"] = comment
+    tempCsv["cortexxdr_unisolated_by"] = NETID
 
-comment = input("Enter a comment: ").strip()
+    newline = dict_to_line(tempCsv)
+    lines[found] = newline
 
-# update line
-r["cortexxdr_unisolated_date"] = timestamp
-r["cortexxdr_unisolated_comment"] = comment
-r["cortexxdr_unisolated_by"] = NETID
-
-
-newline = dict_to_line(r)
-lines[found] = newline
-
-print(newline)
-update_file("newtest.csv", lines)
+    print(newline)
+    update_file("newtest.csv", lines)
 
