@@ -5,7 +5,7 @@ that require modifying Splunk Lookup CSV files.
 
 ## Current Scritps
 
-dirty.py - Automate unisolating a unsupported OS host
+unisolate.py - Automate unisolating a unsupported OS host
 
 
 ## To Do
