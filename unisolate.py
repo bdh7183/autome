@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+from sys import argv
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from datetime import datetime, timedelta, timezone
 
-HEADER = "axonius_aggregated_id,Host,OS,axonius_paloalto_xdr_endpoint_id,cortexxdr_isolated_date,cortexxdr_isolated_by,cortexxdr_unisolated_date,cortexxdr_unisolated_by,cortexxdr_unisolated_comment,"
+HEADER = "axonius_aggregated_id,Host,OS,axonius_paloalto_xdr_endpoint_id,cortexxdr_isolated_date,cortexxdr_isolated_by,cortexxdr_unisolated_date,cortexxdr_unisolated_by,cortexxdr_unisolated_comment"
 FILE = "gois_asset_inventory_blocked_unsupported_operating_systems.csv"
 NETID = "bdh7183"
 
@@ -13,7 +14,7 @@ NETID = "bdh7183"
 def check_data(data):
     if (data.get("cortexxdr_unisolated_date")):
         return False
-    if (data.get("cortexxdr_unisolated_comment")):
+    if (data.get("cortexxdr_unisolated_comment").strip()):
         return False
     if (data.get("cortexxdr_unisolated_by")):
         return False
@@ -64,8 +65,16 @@ def print_found_data(line):
             print(f"{val}: {line[val]}")
 
 
+def prompt_for_xdr(prompt):
+    return input(prompt).strip()
+
 if __name__ == '__main__':
-    xdr = input("Enter a cortex XDR ID: ").strip()
+
+    if len(argv) == 1:
+        xdr = prompt_for_xdr("Enter a cortex XDR ID: ")
+    else:
+        xdr = argv[1]
+
     lines, found = pull_data(FILE, xdr)
 
     if not found:
@@ -85,7 +94,7 @@ if __name__ == '__main__':
 
     # update line
     parsedLine["cortexxdr_unisolated_date"] = timestamp
-    parsedLine["cortexxdr_unisolated_comment"] = comment
+    parsedLine["cortexxdr_unisolated_comment"] = comment + parsedLine["cortexxdr_unisolated_comment"]
     parsedLine["cortexxdr_unisolated_by"] = NETID
 
     # convert back to csv and replace
