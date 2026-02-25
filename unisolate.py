@@ -65,6 +65,11 @@ def print_found_data(line):
             print(f"{val}: {line[val]}")
 
 
+def show_help(prog_name):
+    print(f"{prog_name} CORTEX_ENDPOINT_ID")
+    print(f"Update the blocked lookup for canceling host isolation")
+    exit(0)
+
 def prompt_for_xdr(prompt):
     return input(prompt).strip()
 
@@ -72,9 +77,11 @@ if __name__ == '__main__':
 
     if len(argv) == 1:
         xdr = prompt_for_xdr("Enter a cortex XDR ID: ")
-    else:
-        xdr = argv[1]
-
+    
+    if any(sub in argv[1].upper() for sub in ["?", "-H"]):
+        show_help(argv[0])
+    
+    xdr = argv[1]
     lines, found = pull_data(FILE, xdr)
 
     if not found:
@@ -102,5 +109,5 @@ if __name__ == '__main__':
     lines[found] = newline
 
     print(newline)
-    update_file("newtest.csv", lines)
+    update_file(FILE, lines)
 
