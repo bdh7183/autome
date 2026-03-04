@@ -78,7 +78,7 @@ if __name__ == '__main__':
     if len(argv) == 1:
         xdr = prompt_for_xdr("Enter a cortex XDR ID: ")
     
-    if any(sub in argv[1].upper() for sub in ["?", "-H"]):
+    if len(argv) > 1 and any(sub in argv[1].upper() for sub in ["?", "-H"]):
         show_help(argv[0])
     
     xdr = argv[1]
