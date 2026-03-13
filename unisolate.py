@@ -74,14 +74,14 @@ def prompt_for_xdr(prompt):
     return input(prompt).strip()
 
 if __name__ == '__main__':
+    if len(argv) > 1 and any(sub in argv[1].upper() for sub in ["?", "-H"]):
+        show_help(argv[0])
 
     if len(argv) == 1:
         xdr = prompt_for_xdr("Enter a cortex XDR ID: ")
+    else:
+        xdr = argv[1]
     
-    if len(argv) > 1 and any(sub in argv[1].upper() for sub in ["?", "-H"]):
-        show_help(argv[0])
-    
-    xdr = argv[1]
     lines, found = pull_data(FILE, xdr)
 
     if not found:
